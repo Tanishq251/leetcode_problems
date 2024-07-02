@@ -2,9 +2,10 @@ class Solution {
 public:
     int maxArea(vector<int>& height) {
         int maxArea = 0;
-        int n = height.size();
-        
-        for (int left = 0, right = n - 1; left < right;) {
+        int left = 0;
+        int right = height.size() - 1;
+
+        while (left < right) {
             int currentArea = min(height[left], height[right]) * (right - left);
             maxArea = max(maxArea, currentArea);
 
