@@ -1,24 +1,23 @@
 class Solution {
 public:
     void setZeroes(vector<vector<int>>& matrix) {
-        int m = matrix.size();
-        int n = matrix[0].size();
-        vector<bool> row(m, false);
-        vector<bool> col(n, false);
+        int n = matrix.size();
+        int m = matrix[0].size();
         
-        // Mark rows and columns that contain zeros
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+        vector<int> row(n, 0);
+        vector<int> col(m, 0);
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (matrix[i][j] == 0) {
-                    row[i] = true;
-                    col[j] = true;
+                    row[i] = 1;
+                    col[j] = 1;
                 }
             }
         }
-        
-        // Set elements to zero based on marked rows and columns
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (row[i] || col[j]) {
                     matrix[i][j] = 0;
                 }
