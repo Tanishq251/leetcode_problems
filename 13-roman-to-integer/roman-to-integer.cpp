@@ -2,24 +2,13 @@ class Solution {
 public:
     int romanToInt(string s) {
         int result = 0;
-        int prevValue = 0;
-        for (int i = s.length() - 1; i >= 0; i--) {
-            int curr = 0;
-            switch (s[i]) {
-                case 'I': curr = 1; break;
-                case 'V': curr = 5; break;
-                case 'X': curr = 10; break;
-                case 'L': curr = 50; break;
-                case 'C': curr = 100; break;
-                case 'D': curr = 500; break;
-                case 'M': curr = 1000; break;
+        int values[] = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+        string roman[] = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+        for (int i = 0; i < 13; i++) {
+            while (s.find(roman[i]) == 0) {
+                result += values[i];
+                s.erase(0, roman[i].size());
             }
-            if (curr < prevValue) {
-                result -= curr;
-            } else {
-                result += curr;
-            }
-            prevValue = curr;
         }
         return result;
     }
