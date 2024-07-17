@@ -1,37 +1,40 @@
 class Solution {
 public:
     vector<vector<int>> generateMatrix(int n) {
-        vector<vector<int>> arr(n,vector<int>(n,0));
+        vector<vector<int>> matrix(n,vector<int>(n,0));
 
-        int l=0, r=n-1, top=0, last =n-1;
-        int matr=1;
+        int left =0, top=0, right=n-1, bottom=n-1;
 
-        while(l<=r && top<=last){
-            for(int i=l;i<=r;i++){
-                arr[top][i]=matr++;
+        int digit=1;
+
+
+        while(left<=right && top<=bottom){
+            
+
+            for(int i=left;i<=right;i++){
+                matrix[top][i]=digit++;
             }
             top++;
 
-            for(int i=top; i<= last; i++){
-                arr[i][r]=matr++;
+            for(int i=top;i<=bottom;i++){
+                matrix[i][right]=digit++;
             }
-            r--;
+            right--;
 
-            if(top<=last){
-                for(int i=r;i>=l;i--){
-                    arr[last][i] = matr++;
+            if(top<=bottom){
+                for(int i=right;i>=left;i--){
+                    matrix[bottom][i]=digit++;
                 }
-                last--;
+                bottom --;
             }
 
-            if(l<=r){
-                for(int i=last; i>=top; i--){
-                    arr[i][l]=matr++;
+            if(left<=right){
+                for(int i=bottom; i>=top; i--){
+                    matrix[i][left]= digit++;
                 }
-                l++;
+                left++;
             }
-
         }
-        return arr;
+        return matrix;
     }
 };
