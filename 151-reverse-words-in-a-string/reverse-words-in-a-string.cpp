@@ -1,31 +1,41 @@
 class Solution {
 public:
     string reverseWords(string s) {
-        vector<string> words;
-        int n = s.size();
-        int i = 0;
-        
-        while (i < n) {
-            while (i < n && s[i] == ' ') 
-                i++;
-            if (i < n) {
-                int j = i + 1;
-                while (j < n && s[j] != ' ')
+        auto trim = [](string &s){
+            int n = s.size();
+            int i=0,j=0;
+
+            while(j<n && s[j] == ' ') j++;
+            while(j<n){
+                if(s[j] == ' ' && (j == n-1 || s[j+1]== ' ')){
                     j++;
-                words.push_back(s.substr(i, j - i));
-                i = j + 1;
+                }
+                else{
+                    s[i++] = s[j++];
+                }
+            }
+            s.resize(i);
+        };
+
+        auto reverse = [](string &s, int left, int right){
+            while(left<right){
+                swap(s[left++], s[right--]);
+            }
+        };
+
+        trim(s);
+        int n = s.size();
+
+        reverse(s,0,n-1);
+
+        int start=0;
+        for(int  i =0; i<=n; i++){
+            if(i == n || s[i]== ' '){
+                reverse(s,start,i-1);
+                start = i+1;
             }
         }
-        
-        reverse(words.begin(), words.end());
-        
-        string ans;
-        for (int k = 0; k < words.size(); ++k) {
-            if (k > 0)
-                ans += ' ';
-            ans += words[k];
-        }
-        
-        return ans;
+
+        return s;
     }
 };
