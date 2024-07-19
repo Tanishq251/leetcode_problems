@@ -1,22 +1,23 @@
 class Solution {
 public:
     int maxOperations(vector<int>& nums, int k) {
-        unordered_map<int, int> numCount;
-        int operations = 0;
-        
-        for (int num : nums) {
-            int complement = k - num;
-            if (numCount[complement] > 0) {
-                
-                // If the complement exists in the map, we have found a pair
-                operations++;
-                numCount[complement]--; // Decrease the count of the complement
-            } else {
-                // Otherwise, store the count of the current number
-                numCount[num]++;
+        int n = nums.size();
+        int i=0, j=n-1;
+        int count=0;
+        sort(nums.begin(), nums.end());
+        while(i<j){
+            if(nums[i]+nums[j] > k){
+                j--;
+            }
+            else if(nums[i]+nums[j]<k){
+                i++;
+            }
+            else{
+                count++;
+                i++;
+                j--;
             }
         }
-        
-        return operations;
+        return count;
     }
 };
