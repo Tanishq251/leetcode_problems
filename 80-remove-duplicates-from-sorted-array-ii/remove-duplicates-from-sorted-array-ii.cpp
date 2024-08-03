@@ -6,12 +6,22 @@ public:
     int removeDuplicates(vector<int>& nums) {
         if (nums.size() <= 2) return nums.size();  
         
-        int writeIndex = 2; 
-        for (int i = 2; i < nums.size(); ++i) {
-            if (nums[i] != nums[writeIndex - 2]) {
-                nums[writeIndex++] = nums[i];  
+        int count = 1;
+        int index = 1;
+
+        for(int i=1; i<nums.size(); i++){
+            if(nums[i] == nums[i-1]){
+                if(count < 2){
+                    nums[index++] = nums[i];
+                    count++;
+                }
+            }
+            else{
+                nums[index++]= nums[i];
+                count =1;
             }
         }
-        return writeIndex;  // The new length of the array with allowed duplicates
+        return index;
+        
     }
 };
