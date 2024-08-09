@@ -1,75 +1,47 @@
-
-
 class LockingTree {
 private:
+    static const int MAX_NODES = 2000; // Adjust based on the maximum number of nodes
+
     struct MyTreeNode {
-        int val;
         int lockedBy;
         int parent;
-        int childrenStart;
-        int childrenCount;
+        std::vector<int> children;
         int lockedDescendantCount;
-        int depth;
         
-        MyTreeNode(int v, int p = -1) : val(v), lockedBy(-1), parent(p), 
-                                        childrenStart(-1), childrenCount(0),
-                                        lockedDescendantCount(0), depth(0) {}
+        MyTreeNode(int p = -1) : lockedBy(-1), parent(p), lockedDescendantCount(0) {}
     };
     
     std::vector<MyTreeNode> nodes;
-    std::vector<int> allChildren;
-    std::unordered_set<int> lockedNodes;
+    std::bitset<MAX_NODES> lockedNodes;
+    std::vector<int> depth;
 
 public:
     LockingTree(std::vector<int>& parent) {
         int n = parent.size();
-        nodes.reserve(n);
+        nodes.resize(n);
+        depth.resize(n);
+        
         for (int i = 0; i < n; ++i) {
-            nodes.emplace_back(i, parent[i]);
-        }
-        
-        std::vector<int> childrenCounts(n, 0);
-        for (int i = 1; i < n; ++i) {
-            if (parent[i] >= 0 && parent[i] < n) {
-                childrenCounts[parent[i]]++;
-            }
-        }
-        
-        int totalChildren = 0;
-        for (int i = 0; i < n; ++i) {
-            nodes[i].childrenStart = totalChildren;
-            totalChildren += childrenCounts[i];
-        }
-        
-        allChildren.resize(totalChildren);
-        std::vector<int> nextChildIndex(n);
-        for (int i = 0; i < n; ++i) {
-            nextChildIndex[i] = nodes[i].childrenStart;
-        }
-        
-        for (int i = 1; i < n; ++i) {
-            if (parent[i] >= 0 && parent[i] < n) {
-                int p = parent[i];
-                allChildren[nextChildIndex[p]++] = i;
-                nodes[p].childrenCount++;
+            nodes[i].parent = parent[i];
+            if (parent[i] != -1) {
+                nodes[parent[i]].children.push_back(i);
             }
         }
         
         calculateDepth(0, 0);
     }
 
-    void calculateDepth(int nodeIndex, int depth) {
-        nodes[nodeIndex].depth = depth;
-        int childrenEnd = nodes[nodeIndex].childrenStart + nodes[nodeIndex].childrenCount;
-        for (int i = nodes[nodeIndex].childrenStart; i < childrenEnd; ++i) {
-            calculateDepth(allChildren[i], depth + 1);
+    void calculateDepth(int nodeIndex, int d) {
+        depth[nodeIndex] = d;
+        for (int child : nodes[nodeIndex].children) {
+            calculateDepth(child, d + 1);
         }
     }
 
     bool lock(int num, int user) {
         if (nodes[num].lockedBy == -1) {
             nodes[num].lockedBy = user;
-            lockedNodes.insert(num);
+            lockedNodes.set(num);
             int parent = nodes[num].parent;
             while (parent != -1) {
                 nodes[parent].lockedDescendantCount++;
@@ -83,7 +55,7 @@ public:
     bool unlock(int num, int user) {
         if (nodes[num].lockedBy == user) {
             nodes[num].lockedBy = -1;
-            lockedNodes.erase(num);
+            lockedNodes.reset(num);
             int parent = nodes[num].parent;
             while (parent != -1) {
                 nodes[parent].lockedDescendantCount--;
@@ -105,25 +77,10 @@ public:
             parent = nodes[parent].parent;
         }
         
-        std::vector<int> toUnlock;
-        for (int locked : lockedNodes) {
-            if (isDescendant(num, locked)) {
-                toUnlock.push_back(locked);
-            }
-        }
-        
-        for (int locked : toUnlock) {
-            nodes[locked].lockedBy = -1;
-            lockedNodes.erase(locked);
-            parent = nodes[locked].parent;
-            while (parent != -1) {
-                nodes[parent].lockedDescendantCount--;
-                parent = nodes[parent].parent;
-            }
-        }
+        unlockDescendants(num);
         
         nodes[num].lockedBy = user;
-        lockedNodes.insert(num);
+        lockedNodes.set(num);
         parent = nodes[num].parent;
         while (parent != -1) {
             nodes[parent].lockedDescendantCount++;
@@ -133,13 +90,19 @@ public:
     }
 
 private:
-    bool isDescendant(int ancestor, int descendant) {
-        return nodes[ancestor].depth < nodes[descendant].depth &&
-               isAncestor(ancestor, descendant);
+    void unlockDescendants(int num) {
+        for (int child : nodes[num].children) {
+            if (lockedNodes[child]) {
+                nodes[child].lockedBy = -1;
+                lockedNodes.reset(child);
+                nodes[num].lockedDescendantCount--;
+            }
+            unlockDescendants(child);
+        }
     }
-    
+
     bool isAncestor(int ancestor, int descendant) {
-        while (nodes[descendant].depth > nodes[ancestor].depth) {
+        while (depth[descendant] > depth[ancestor]) {
             descendant = nodes[descendant].parent;
         }
         return ancestor == descendant;
