@@ -3,9 +3,9 @@ struct MyTreeNode {
     int lockedBy; // Stores the user who locked the node, or -1 if unlocked
     MyTreeNode* parent; // Pointer to the parent node
     vector<MyTreeNode*> children; // List of child nodes
-    set<MyTreeNode*> lockedDescendants; // Set of descendants that are locked
+    int lockedDescendantCount; // Count of locked descendants
 
-    MyTreeNode(int v, MyTreeNode* p = nullptr) : val(v), lockedBy(-1), parent(p) {}
+    MyTreeNode(int v, MyTreeNode* p = nullptr) : val(v), lockedBy(-1), parent(p), lockedDescendantCount(0) {}
 };
 
 class LockingTree {
@@ -33,7 +33,7 @@ public:
             node->lockedBy = user;
             MyTreeNode* parent = node->parent;
             while (parent) {
-                parent->lockedDescendants.insert(node);
+                parent->lockedDescendantCount++;
                 parent = parent->parent;
             }
             return true;
@@ -47,7 +47,7 @@ public:
             node->lockedBy = -1;
             MyTreeNode* parent = node->parent;
             while (parent) {
-                parent->lockedDescendants.erase(node);
+                parent->lockedDescendantCount--;
                 parent = parent->parent;
             }
             return true;
@@ -57,7 +57,7 @@ public:
 
     bool upgrade(int num, int user) {
         MyTreeNode* node = nodeMap[num];
-        if (node->lockedBy != -1 || node->lockedDescendants.empty()) {
+        if (node->lockedBy != -1 || node->lockedDescendantCount == 0) {
             return false; // The node is either locked or has no locked descendants
         }
 
@@ -68,23 +68,29 @@ public:
         }
 
         // Unlock all locked descendants
-        for (MyTreeNode* desc : node->lockedDescendants) {
-            desc->lockedBy = -1;
-            MyTreeNode* p = desc->parent;
-            while (p) {
-                p->lockedDescendants.erase(desc);
-                p = p->parent;
-            }
-        }
-        node->lockedDescendants.clear(); // Clear the set after unlocking
+        unlockDescendants(node);
 
         // Lock the current node
         node->lockedBy = user;
         parent = node->parent;
         while (parent) { // Update ancestors about the locking
-            parent->lockedDescendants.insert(node);
+            parent->lockedDescendantCount++;
             parent = parent->parent;
         }
         return true;
+    }
+
+    void unlockDescendants(MyTreeNode* node) {
+        for (MyTreeNode* child : node->children) {
+            if (child->lockedBy != -1) {
+                child->lockedBy = -1;
+                MyTreeNode* parent = child->parent;
+                while (parent) {
+                    parent->lockedDescendantCount--;
+                    parent = parent->parent;
+                }
+            }
+            unlockDescendants(child); // Recursively unlock all descendants
+        }
     }
 };
