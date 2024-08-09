@@ -67,8 +67,26 @@ public:
             parent = parent->parent;
         }
 
-        // Unlock all locked descendants
-        unlockDescendants(node);
+        // Use a stack to unlock all locked descendants iteratively
+        stack<MyTreeNode*> toUnlock;
+        toUnlock.push(node);
+        
+        while (!toUnlock.empty()) {
+            MyTreeNode* current = toUnlock.top();
+            toUnlock.pop();
+            
+            for (MyTreeNode* child : current->children) {
+                if (child->lockedBy != -1) {
+                    child->lockedBy = -1;
+                    MyTreeNode* p = child->parent;
+                    while (p) {
+                        p->lockedDescendantCount--;
+                        p = p->parent;
+                    }
+                }
+                toUnlock.push(child);
+            }
+        }
 
         // Lock the current node
         node->lockedBy = user;
@@ -78,19 +96,5 @@ public:
             parent = parent->parent;
         }
         return true;
-    }
-
-    void unlockDescendants(MyTreeNode* node) {
-        for (MyTreeNode* child : node->children) {
-            if (child->lockedBy != -1) {
-                child->lockedBy = -1;
-                MyTreeNode* parent = child->parent;
-                while (parent) {
-                    parent->lockedDescendantCount--;
-                    parent = parent->parent;
-                }
-            }
-            unlockDescendants(child); // Recursively unlock all descendants
-        }
     }
 };
