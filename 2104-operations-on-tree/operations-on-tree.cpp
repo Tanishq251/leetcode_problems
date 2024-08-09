@@ -2,7 +2,7 @@ class LockingTree {
 private:
     unordered_map<int, int> parent;
     unordered_map<int, int> locked;
-    unordered_map<int, std::unordered_set<int>> children;
+    unordered_map<int, unordered_set<int>> children;
     unordered_map<int, int> lockedDescendantsCount;
 
 public:
