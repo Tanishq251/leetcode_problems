@@ -1,20 +1,21 @@
 class Solution {
 public:
-    int bs(vector<int> arr, int low, int high, int n){
-        while(low<=high){
-            int mid = low+(high-low)/2;
-
-            if(arr[mid] == n)
+    int search(vector<int>& nums, int target) {
+        int low = 0;
+        int high = nums.size() - 1;
+        
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            
+            if (nums[mid] == target) 
                 return mid;
             
-            if(arr[mid]<n)
-                low = mid+1;
-            else
-                high = mid -1;
+            if (nums[mid] < target) 
+                low = mid + 1;
+            else 
+                high = mid - 1;
         }
-        return -1;
-    }
-    int search(vector<int>& nums, int target) {
-        return bs(nums,0,nums.size()-1,target);
+        
+        return -1; // Target not found
     }
 };
